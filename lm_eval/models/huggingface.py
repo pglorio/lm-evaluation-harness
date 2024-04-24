@@ -21,6 +21,8 @@ from transformers.models.auto.modeling_auto import (
     MODEL_FOR_CAUSAL_LM_MAPPING_NAMES,
     MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES,
 )
+from transformers import BitsAndBytesConfig
+from peft import prepare_model_for_kbit_training
 
 from lm_eval import utils
 from lm_eval.api.instance import Instance
