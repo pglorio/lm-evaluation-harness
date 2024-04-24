@@ -474,6 +474,80 @@ class HFLM(TemplateLM):
             trust_remote_code=trust_remote_code,
         )
 
+def load_model_and_tokenizer(
+        self,
+        model_name: str,
+        base: bool,
+        tuned_model_dir: str,
+        layer_drop_arr : List[int],
+        cutoff_len: int,
+        base_pruning_layers_no_healing: bool
+    ):
+
+        assert layer_drop_arr is not None, f"Layer drop array is none!!"
+        assert cutoff_len is not None
+
+        device = "cuda:0"
+        device_map = "cuda:0"
+
+        #Loading tokenizer
+        if "Qwen" in model_name:
+            tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, pad_token='<|extra_0|>', trust_remote_code=True)
+        else:
+            tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, trust_remote_code=True, padding_side = 'right', truncation_side='right')
+
+        # Sometime pad_token is not deifned
+        if tokenizer.pad_token_id == None:
+            tokenizer.pad_token_id = 1
+        
+        print(f" HERE ARE THE SPECIAL TOKENS {tokenizer.pad_token_id}, {tokenizer.bos_token_id}, {tokenizer.eos_token_id}")
+
+        bnb_config = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_compute_dtype=torch.bfloat16,
+                )
+        base_model = transformers.AutoModelForCausalLM.from_pretrained(
+                    model_name, 
+                    quantization_config=bnb_config,
+                    device_map=device_map,
+                    pad_token_id=1,
+                    trust_remote_code=True,
+                    use_cache=False
+            )
+        base_model = prepare_model_for_kbit_training(base_model)
+
+        if not base:
+            if "Qwen" in model_name:
+                base_model.transformer.h = torch.nn.ModuleList([block for idx, block in enumerate(base_model.transformer.h) if idx not in layer_drop_arr])
+            else:
+                base_model.base_model.layers = torch.nn.ModuleList([block for idx, block in enumerate(base_model.base_model.layers) if idx not in layer_drop_arr])
+            print(f"We are removing: {layer_drop_arr} layers")
+            
+            if (base or base_pruning_layers_no_healing): 
+                model = base_model
+            else:
+                model = PeftModel.from_pretrained(
+                        base_model,
+                        tuned_model_dir,
+                        torch_dtype=torch.bfloat16,
+                    )
+                del base_model
+
+        if base:
+            model = base_model
+            print(f"We are removing: 0 layers and evaluating the base model!")
+
+        # If we are using qwen models, there are no start tokens
+        add_start_token = True
+        if "Qwen" in model_name:
+            add_start_token = False
+
+
+        return model, tokenizer
+
+    
     def _create_model(
         self,
         pretrained: str,
@@ -540,12 +614,21 @@ class HFLM(TemplateLM):
                         model_kwargs["bnb_4bit_compute_dtype"] = get_dtype(
                             model_kwargs["bnb_4bit_compute_dtype"]
                         )
-            self._model = self.AUTO_MODEL_CLASS.from_pretrained(
-                pretrained,
-                revision=revision,
-                torch_dtype=get_dtype(dtype),
-                trust_remote_code=trust_remote_code,
-                **model_kwargs,
+            # self._model = self.AUTO_MODEL_CLASS.from_pretrained(
+            #     pretrained,
+            #     revision=revision,
+            #     torch_dtype=get_dtype(dtype),
+            #     trust_remote_code=trust_remote_code,
+            #     **model_kwargs,
+            # )
+            self._model, _ = self.load_model_and_tokenizer(
+                model_name=pretrained, 
+                base=False,
+                tuned_model_dir=None,
+                #layer_drop_arr=[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], 
+                layer_drop_arr=[27], 
+                cutoff_len=2, # forgot what this is?
+                base_pruning_layers_no_healing=True
             )
         else:
             try:
@@ -817,7 +900,7 @@ class HFLM(TemplateLM):
             max_length=max_length,
             stopping_criteria=stopping_criteria,
             pad_token_id=self.tokenizer.pad_token_id,
-            use_cache=True,
+            use_cache=False,
             **generation_kwargs,
         )
 
