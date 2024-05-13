@@ -230,8 +230,8 @@ def setup_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--layers-removed",
-        type=parse_int_list,
-        default=[],
+        type=str,
+        default="",
         help="A space-separated list of integers denoting layers to be omitted, e.g. `0 5 10 19`"
     )
 
