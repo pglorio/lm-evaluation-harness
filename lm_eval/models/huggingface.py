@@ -35,7 +35,7 @@ from lm_eval.models.utils import (
     pad_and_concat,
     stop_sequences_criteria,
 )
-from lm_eval import parse_eval_args, setup_parser
+#from lm_eval import parse_eval_args, setup_parser
 
 
 eval_logger = utils.eval_logger
