@@ -623,7 +623,7 @@ class HFLM(TemplateLM):
             #     trust_remote_code=trust_remote_code,
             #     **model_kwargs,
             # )
-            from lm_eval import setup_parser
+            from lm_eval.__main__ import setup_parser
             parser = setup_parser()
             args = parser.parse_args()
             layer_removed = [int(x) for x in args.layers_removed.split()]
