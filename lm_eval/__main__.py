@@ -228,6 +228,12 @@ def setup_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Sets trust_remote_code to True to execute code to create HF Datasets from the Hub",
     )
+    parser.add_argument(
+        "--layers-removed",
+        type=parse_int_list,
+        default=[],
+        help="A space-separated list of integers denoting layers to be omitted, e.g. `0 5 10 19`"
+    )
 
     return parser
 
