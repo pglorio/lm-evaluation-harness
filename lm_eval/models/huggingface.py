@@ -689,7 +689,7 @@ def _create_model(
 
         return None
 
-    def _create_tokenizer(
+def _create_tokenizer(
         self,
         pretrained: Union[str, transformers.PreTrainedModel],
         tokenizer: Optional[
