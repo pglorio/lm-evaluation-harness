@@ -550,7 +550,7 @@ def load_model_and_tokenizer(
         return model, tokenizer
 
     
-    def _create_model(
+def _create_model(
         self,
         pretrained: str,
         revision: Optional[str] = "main",
