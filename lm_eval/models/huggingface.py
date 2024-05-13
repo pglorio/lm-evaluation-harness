@@ -35,7 +35,6 @@ from lm_eval.models.utils import (
     pad_and_concat,
     stop_sequences_criteria,
 )
-#from lm_eval import parse_eval_args, setup_parser
 
 
 eval_logger = utils.eval_logger
@@ -624,6 +623,7 @@ class HFLM(TemplateLM):
             #     trust_remote_code=trust_remote_code,
             #     **model_kwargs,
             # )
+            from lm_eval import parse_eval_args, setup_parser
             parser = setup_parser()
             args = parse_eval_args(parser)
             layer_removed = args.layers_removed
