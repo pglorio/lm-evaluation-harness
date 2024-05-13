@@ -476,7 +476,7 @@ class HFLM(TemplateLM):
             trust_remote_code=trust_remote_code,
         )
 
-def load_model_and_tokenizer(
+    def load_model_and_tokenizer(
         self,
         model_name: str,
         base: bool,
@@ -550,7 +550,7 @@ def load_model_and_tokenizer(
         return model, tokenizer
 
     
-def _create_model(
+    def _create_model(
         self,
         pretrained: str,
         revision: Optional[str] = "main",
@@ -689,7 +689,7 @@ def _create_model(
 
         return None
 
-def _create_tokenizer(
+    def _create_tokenizer(
         self,
         pretrained: Union[str, transformers.PreTrainedModel],
         tokenizer: Optional[
