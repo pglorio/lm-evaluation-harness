@@ -623,9 +623,9 @@ class HFLM(TemplateLM):
             #     trust_remote_code=trust_remote_code,
             #     **model_kwargs,
             # )
-            from lm_eval import parse_eval_args, setup_parser
+            from lm_eval import setup_parser
             parser = setup_parser()
-            args = parse_eval_args(parser)
+            args = parser.parse_args()
             layer_removed = [int(x) for x in args.layers_removed.split()]
             self._model, _ = self.load_model_and_tokenizer(
                 model_name=pretrained, 
