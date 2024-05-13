@@ -35,6 +35,7 @@ from lm_eval.models.utils import (
     pad_and_concat,
     stop_sequences_criteria,
 )
+from lm_eval import parse_eval_args, setup_parser
 
 
 eval_logger = utils.eval_logger
@@ -623,12 +624,15 @@ class HFLM(TemplateLM):
             #     trust_remote_code=trust_remote_code,
             #     **model_kwargs,
             # )
+            parser = setup_parser()
+            args = parse_eval_args(parser)
+            layer_removed = args.layers_removed
             self._model, _ = self.load_model_and_tokenizer(
                 model_name=pretrained, 
                 base=False,
                 tuned_model_dir=None,
                 #layer_drop_arr=[3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29], 
-                layer_drop_arr=[27], 
+                layer_drop_arr=layer_removed, 
                 cutoff_len=2, # forgot what this is?
                 base_pruning_layers_no_healing=True
             )
