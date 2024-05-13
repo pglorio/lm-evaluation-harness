@@ -626,7 +626,7 @@ class HFLM(TemplateLM):
             from lm_eval import parse_eval_args, setup_parser
             parser = setup_parser()
             args = parse_eval_args(parser)
-            layer_removed = args.layers_removed
+            layer_removed = [int(x) for x in args.layers_removed.split()]
             self._model, _ = self.load_model_and_tokenizer(
                 model_name=pretrained, 
                 base=False,
